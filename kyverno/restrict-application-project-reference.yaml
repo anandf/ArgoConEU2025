@@ -1,0 +1,22 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-application-project-reference
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: check-application-refers-allowed-project
+    match:
+      any:
+      - resources:
+          kinds:
+          - Application
+    validate:
+      message: "Application must refer only projects allowed for the tenant having the format <tenant_id>-tenant."
+      deny:
+        conditions:
+          any:
+          - key: "{{ request.object.spec.project }}"
+            operator: NotEquals
+            value:  "{{ replace_all(request.object.metadata.namespace, '-tenant-ns', '') }}-tenant"

@@ -1,0 +1,24 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-destination-namespace
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: check-destination-namespace-has-tenant-id-prefix
+    match:
+      any:
+      - resources:
+          kinds:
+          - Application
+    validate:
+      message: "Destination namespace prefix of an Application must match the tenant id or the Application's namespace"
+      deny:
+        conditions:
+          any:
+          - key: "{{ request.object.spec.destination.namespace }}"
+            operator: AnyNotIn
+            value: 
+            - "{{ request.object.metadata.namespace }}"
+            - "{{ replace_all(request.object.metadata.namespace, '-tenant-ns', '') }}-*"

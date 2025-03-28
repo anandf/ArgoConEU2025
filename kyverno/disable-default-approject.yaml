@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disable-default-appproject
+  annotations:
+    policies.kyverno.io/description: >-
+      This policy performs some best practices validation on Application fields.
+      Applications should not use the default appproject.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: default-appproject
+      match:
+        any:
+        - resources:
+            kinds:
+            - Application
+      validate:
+        message: >-
+          `spec.project` should not be set to default.
+        deny:
+          conditions:
+            any:
+            - key: "{{ request.object.spec.project }}"
+              operator: Equals
+              value: "default"
