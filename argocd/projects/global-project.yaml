@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: global
+  namespace: argocd
+spec:
+  description: Global admin configurations for all tenants
+  clusterResourceBlacklist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceBlacklist:
+    - group: ''
+      kind: 'Namespace'
+    - group: '*'
+      kind: 'ResourceQuota'
+    - group: '*'
+      kind: 'LimitRange'
+    - group: 'operators.coreos.com'
+      kind: '*'
+    - group: 'operator.openshift.io'
+      kind: '*'
+    - group: 'storage.k8s.io'
+      kind: '*'
+    - group: 'machine.openshift.io'
+      kind: '*'
+    - group: 'machineconfiguration.openshift.io'
+      kind: '*'
+    - group: 'compliance.openshift.io'
+      kind: '*'
+
+
+    

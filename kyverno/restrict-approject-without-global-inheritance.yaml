@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disable-default-appproject
+  annotations:
+    policies.kyverno.io/description: >-
+      This policy performs some best practices validation on Application fields.
+      Tenant AppProjects must inherit the global AppProject.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: global-inheritance-appproject
+      match:
+        any:
+        - resources:
+            kinds:
+            - AppProject
+            names:
+            - '*-tenant'
+      validate:
+        message: >-
+          All tenant app projects must inherit configurations done in global project.
+        pattern:
+          metadata:
+            labels:
+              argocd.argoproj.io/project-inherit: "global"

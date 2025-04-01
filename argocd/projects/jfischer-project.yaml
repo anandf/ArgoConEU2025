@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: jfischer-tenant
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/project-inherit: global
+spec:
+  description: Admin configurations for tenant jfischer
+  roles:
+  - description: Read Only
+    name: read-only
+    policies:
+    - p, proj:jfischer-tenant:read-only, applications, get, jfischer-tenant-ns/*, allow
+  - description: tenant admins
+    name: admin
+    policies:
+    - p, proj:jfischer-tenant:admin, applications, *, jfischer-tenant-ns/*, allow
+  - description: tenant users
+    name: user
+    policies:
+    - p, proj:jfischer-tenant:user, applications, get, jfischer-tenant-ns/*, allow
+    - p, proj:jfischer-tenant:user, applications, sync, jfischer-tenant-ns/*, allow
+  - description: pipeline accounts
+    name: pipeline
+    policies:
+    - p, proj:jfischer-tenant:pipeline, applications, get, jfischer-tenant-ns/*, allow
+    - p, proj:jfischer-tenant:pipeline, applications, sync, jfischer-tenant-ns/*, allow
+  destinationServiceAccounts:
+  - defaultServiceAccount: jfischer-tenant-ns:jfischer-admin-sa
+    namespace: jfischer-*
+    server: https://kubernetes.default.svc
+  destinations:
+  - namespace: jfischer-*
+    server: https://kubernetes.default.svc
+  sourceNamespaces:
+  - jfischer-tenant-ns      
+  sourceRepos:
+  - https://github.com/anandf/*.git

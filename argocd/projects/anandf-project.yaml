@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: anandf-tenant
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/project-inherit: global
+spec:
+  description: Admin configurations for tenant anandf
+  roles:
+  - description: Read Only
+    name: read-only
+    policies:
+    - p, proj:anandf-tenant:read-only, applications, get, anandf-tenant-ns/*, allow
+  - description: tenant admins
+    name: admin
+    policies:
+    - p, proj:anandf-tenant:admin, applications, *, anandf-tenant-ns/*, allow
+  - description: tenant users
+    name: user
+    policies:
+    - p, proj:anandf-tenant:user, applications, get, anandf-tenant-ns/*, allow
+    - p, proj:anandf-tenant:user, applications, sync, anandf-tenant-ns/*, allow
+  - description: pipeline accounts
+    name: pipeline
+    policies:
+    - p, proj:anandf-tenant:pipeline, applications, get, anandf-tenant-ns/*, allow
+    - p, proj:anandf-tenant:pipeline, applications, sync, anandf-tenant-ns/*, allow
+  destinationServiceAccounts:
+  - defaultServiceAccount: anandf-tenant-ns:anandf-admin-sa
+    namespace: anandf-*
+    server: https://kubernetes.default.svc
+  destinations:
+  - namespace: anandf-*
+    server: https://kubernetes.default.svc
+  sourceNamespaces:
+  - anandf-tenant-ns      
+  sourceRepos:
+  - https://github.com/anandf/*.git

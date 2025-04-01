@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{.ID}}-tenant
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/project-inherit: global
+spec:
+  description: Admin configurations for tenant {{.ID}}
+  roles:
+  - description: Read Only
+    name: read-only
+    policies:
+    - p, proj:{{.ID}}-tenant:read-only, applications, get, {{.ID}}-tenant-ns/*, allow
+  - description: tenant admins
+    name: admin
+    policies:
+    - p, proj:{{.ID}}-tenant:admin, applications, *, {{.ID}}-tenant-ns/*, allow
+  - description: tenant users
+    name: user
+    policies:
+    - p, proj:{{.ID}}-tenant:user, applications, get, {{.ID}}-tenant-ns/*, allow
+    - p, proj:{{.ID}}-tenant:user, applications, sync, {{.ID}}-tenant-ns/*, allow
+  - description: pipeline accounts
+    name: pipeline
+    policies:
+    - p, proj:{{.ID}}-tenant:pipeline, applications, get, {{.ID}}-tenant-ns/*, allow
+    - p, proj:{{.ID}}-tenant:pipeline, applications, sync, {{.ID}}-tenant-ns/*, allow
+  destinationServiceAccounts:
+  - defaultServiceAccount: {{.ID}}-tenant-admin-sa
+    namespace: {{.ID}}-*
+    server: https://kubernetes.default.svc
+  destinations:
+  - namespace: {{.ID}}-*
+    server: https://kubernetes.default.svc
+  sourceNamespaces:
+  - {{.ID}}-tenant-ns      
+  sourceRepos:
+  - https://github.com/{{.ID}}/*.git
